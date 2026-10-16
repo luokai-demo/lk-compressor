@@ -18,6 +18,7 @@ jobs:
     permissions:
       contents: write
     env:
+      PYTHONUTF8: '1'
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       RELEASE_TAG: ${{ inputs.tag }}
