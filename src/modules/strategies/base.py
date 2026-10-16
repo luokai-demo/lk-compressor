@@ -10,7 +10,7 @@ class CompressionStrategy(ABC):
     
     所有具体压缩策略都必须继承此类并实现抽象方法
     """
-    
+
     def __init__(self, config, logger=None, params=None):
         """初始化压缩策略
         
@@ -31,7 +31,7 @@ class CompressionStrategy(ABC):
         self.performance = {}  # 性能指标
         self.recommended_types = []  # 推荐图像类型
         self.use_cases = []  # 典型应用场景
-    
+
     @abstractmethod
     def compress(self, file_path):
         """压缩文件
@@ -43,31 +43,31 @@ class CompressionStrategy(ABC):
             tuple: (原始大小, 压缩后大小)
         """
         pass
-    
+
     def get_name(self):
         """获取策略名称"""
         return self.name
-    
+
     def get_description(self):
         """获取策略描述"""
         return self.description
-    
+
     def get_tools(self):
         """获取使用的工具列表"""
         return self.tools
-    
+
     def get_performance(self):
         """获取性能指标"""
         return self.performance
-    
+
     def get_recommended_types(self):
         """获取推荐图像类型"""
         return self.recommended_types
-    
+
     def get_use_cases(self):
         """获取典型应用场景"""
         return self.use_cases
-    
+
     def get_file_size(self, file_path):
         """获取文件大小
         
@@ -81,7 +81,7 @@ class CompressionStrategy(ABC):
         if os.path.exists(file_path):
             return os.path.getsize(file_path)
         return 0
-    
+
     def calculate_compression_rate(self, original_size, final_size):
         """计算压缩率
         

@@ -12,8 +12,8 @@ class ParameterValidationError(Exception):
 
 class ToolParameter:
     """单个工具参数封装类"""
-    
-    def __init__(self, name, value=None, param_type=str, required=False, 
+
+    def __init__(self, name, value=None, param_type=str, required=False,
                  min_value=None, max_value=None, default=None, description="", 
                  hint=""):
         """初始化工具参数
@@ -37,10 +37,10 @@ class ToolParameter:
         self.default = default
         self.description = description
         self.hint = hint
-        
+
         # 设置参数值，如果未提供则使用默认值
         self.value = value if value is not None else default
-    
+
     def validate(self):
         """验证参数有效性，实现双重验证机制
         
@@ -50,7 +50,7 @@ class ToolParameter:
         # 1. 空值校验
         if self.required and self.value is None:
             raise ParameterValidationError(f"参数 '{self.name}' 是必填项")
-        
+
         # 2. 类型校验
         if self.value is not None and not isinstance(self.value, self.param_type):
             try:
@@ -60,7 +60,7 @@ class ToolParameter:
                 raise ParameterValidationError(
                     f"参数 '{self.name}' 类型错误，期望 {self.param_type.__name__}，实际 {type(self.value).__name__}"
                 )
-        
+
         # 3. 范围校验（仅适用于数值类型）
         if isinstance(self.value, (int, float)):
             if self.min_value is not None and self.value < self.min_value:
@@ -71,11 +71,11 @@ class ToolParameter:
                 raise ParameterValidationError(
                     f"参数 '{self.name}' 超出最大值范围，最大值为 {self.max_value}"
                 )
-    
+
     def get_value(self):
         """获取参数值"""
         return self.value
-    
+
     def set_value(self, value):
         """设置参数值
         
@@ -86,7 +86,7 @@ class ToolParameter:
 
 class ParameterValidator:
     """参数验证器，用于验证一组参数"""
-    
+
     @staticmethod
     def validate_parameters(parameters):
         """验证一组参数
@@ -112,7 +112,7 @@ class ParameterValidator:
 
 class ToolParameterSet:
     """工具参数集合，管理一组相关的工具参数"""
-    
+
     def __init__(self, tool_name, parameters=None):
         """初始化参数集合
         
@@ -122,7 +122,7 @@ class ToolParameterSet:
         """
         self.tool_name = tool_name
         self.parameters = parameters or {}
-    
+
     def add_parameter(self, parameter):
         """添加参数
         
@@ -131,7 +131,7 @@ class ToolParameterSet:
         """
         if isinstance(parameter, ToolParameter):
             self.parameters[parameter.name] = parameter
-    
+
     def get_parameter(self, name):
         """获取参数
         
@@ -142,7 +142,7 @@ class ToolParameterSet:
             ToolParameter: 参数对象
         """
         return self.parameters.get(name)
-    
+
     def get_parameter_value(self, name, default=None):
         """获取参数值
         
@@ -155,7 +155,7 @@ class ToolParameterSet:
         """
         param = self.parameters.get(name)
         return param.value if param else default
-    
+
     def set_parameter_value(self, name, value):
         """设置参数值
         
@@ -166,7 +166,7 @@ class ToolParameterSet:
         param = self.parameters.get(name)
         if param:
             param.set_value(value)
-    
+
     def validate(self):
         """验证所有参数
         
@@ -174,7 +174,7 @@ class ToolParameterSet:
             ParameterValidationError: 任何参数验证失败时抛出
         """
         ParameterValidator.validate_parameters(self.parameters)
-    
+
     def to_dict(self):
         """将参数集合转换为字典
         
@@ -182,10 +182,10 @@ class ToolParameterSet:
             dict: 参数名到参数值的映射
         """
         return {
-            name: param.value 
+            name: param.value
             for name, param in self.parameters.items()
         }
-    
+
     @classmethod
     def from_dict(cls, tool_name, param_dict, param_definitions):
         """从字典创建参数集合
@@ -199,11 +199,11 @@ class ToolParameterSet:
             ToolParameterSet: 参数集合对象
         """
         parameters = {}
-        
+
         for param_name, definition in param_definitions.items():
             # 从param_dict获取参数值，如果不存在则使用定义中的默认值
             value = param_dict.get(param_name, definition.get('default'))
-            
+
             # 创建ToolParameter对象
             param = ToolParameter(
                 name=param_name,
@@ -217,7 +217,7 @@ class ToolParameterSet:
                 hint=definition.get('hint', '')
             )
             parameters[param_name] = param
-        
+
         return cls(tool_name, parameters)
 
 # 工具参数定义字典，集中管理所有工具的参数规则

@@ -12,7 +12,7 @@ from datetime import datetime
 
 class Config:
     """配置类，管理压缩工具的配置信息"""
-    
+
     def __init__(self):
         # 处理PyInstaller打包后的情况
         if getattr(sys, 'frozen', False):
@@ -30,25 +30,25 @@ class Config:
             self.root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             # 直接运行时的工具目录
             self.tools_dir = os.path.join(os.path.dirname(self.root_dir), 'tools', 'modes')
-        
+
         # 默认图片目录 - 不设置默认路径，用户需要手动选择
         self.default_image_dir = ""
-        
+
         # 默认策略
         self.default_strategy = 'speed'
-        
+
         # 当前选择的策略
         self.current_strategy = self.default_strategy
-        
+
         # 启动提示配置
         self.startup_warning = {
             'show': True,  # 是否显示启动提示
             'config_file': os.path.join(self.root_dir, 'startup_warning_config.json')
         }
-        
+
         # 加载启动提示配置
         self._load_startup_warning_config()
-        
+
         # 压缩工具配置
         self.tools_config = {
             'pngquant': {
@@ -100,63 +100,62 @@ class Config:
                 'compatible_types': ['mp3', 'wav', 'ogg', 'flac', 'aac', 'wma', 'm4a']
             }
         }
-        
+
         # 支持的图片格式
         self.supported_formats = ['.png', '.jpg', '.jpeg']
-        
+
         # 支持的音频格式
         self.supported_audio_formats = ['.mp3', '.wav', '.ogg', '.flac', '.aac', '.wma', '.m4a']
-        
-        
-    
+
+
     def validate_tools(self):
         """验证压缩工具是否存在"""
         missing_tools = []
-        
+
         # 验证所有工具，跳过libimagequant，因为它是Python库
         for tool_name, tool_info in self.tools_config.items():
             # 跳过libimagequant，因为它是Python库，不需要实际路径
             if tool_name == 'libimagequant':
                 continue
-            
+
             tool_path = tool_info['path']
             if not os.path.exists(tool_path):
                 missing_tools.append(tool_name + '.exe')
-        
+
         return missing_tools
-    
+
     def get_tool_path(self, tool_name):
         """获取指定工具的路径"""
         if tool_name in self.tools_config:
             return self.tools_config[tool_name]['path']
         return None
-    
+
     def get_tool_type(self, tool_name):
         """获取指定工具的类型"""
         if tool_name in self.tools_config:
             return self.tools_config[tool_name]['type']
         return None
-    
+
     def set_current_strategy(self, strategy_name):
         """设置当前策略"""
         self.current_strategy = strategy_name
-    
+
     def get_current_strategy(self):
         """获取当前策略"""
         return self.current_strategy
-    
+
     def get_all_tools(self):
         """获取所有配置的压缩工具"""
         return list(self.tools_config.keys())
-    
+
     def get_tools_by_type(self, tool_type):
         """获取指定类型的所有压缩工具"""
         return [tool_name for tool_name, tool_info in self.tools_config.items() if tool_info['type'] == tool_type]
-    
+
     def get_tool_info(self, tool_name):
         """获取工具详细信息"""
         return self.tools_config.get(tool_name, {})
-    
+
     def _load_startup_warning_config(self):
         """加载启动提示配置"""
         try:
@@ -170,7 +169,7 @@ class Config:
             self.startup_warning['show'] = True
             import logging
             logging.error(f"加载启动提示配置失败: {str(e)}")
-    
+
     def save_startup_warning_config(self, show_warning):
         """保存启动提示配置"""
         try:
@@ -185,7 +184,7 @@ class Config:
         except Exception as e:
             import logging
             logging.error(f"保存启动提示配置失败: {str(e)}")
-    
+
     def should_show_startup_warning(self):
         """检查是否应该显示启动提示"""
         return self.startup_warning['show']

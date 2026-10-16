@@ -11,7 +11,7 @@ from .logger import Logger
 
 class ToolInvoker:
     """工具调用器，统一管理工具调用"""
-    
+
     def __init__(self, tools_manager, logger=None):
         """初始化工具调用器
         
@@ -21,7 +21,7 @@ class ToolInvoker:
         """
         self.tools_manager = tools_manager
         self.logger = logger or Logger()
-    
+
     def invoke_tool(self, tool_type, tool_name, file_path, params_dict=None):
         """调用指定工具压缩文件
         
@@ -44,35 +44,35 @@ class ToolInvoker:
             param_definitions = {}
         else:
             param_definitions = TOOL_PARAMETER_DEFINITIONS[tool_name]
-        
+
         # 2. 创建参数集合
         param_set = ToolParameterSet.from_dict(
             tool_name=tool_name,
             param_dict=params_dict or {},
             param_definitions=param_definitions
         )
-        
+
         # 3. 验证参数
         self.logger.debug(f"验证工具 '{tool_name}' 的参数: {param_set.to_dict()}")
         param_set.validate()
-        
+
         # 4. 获取工具实例
         tool = self.tools_manager.get_tool(tool_type, tool_name)
-        
+
         # 5. 调用工具
         try:
             self.logger.debug(f"调用工具 '{tool_name}' 压缩文件: {file_path}")
             self.logger.debug(f"工具参数: {param_set.to_dict()}")
-            
+
             # 将参数集合转换为字典传递给工具
             result = tool.compress(file_path, **param_set.to_dict())
-            
+
             self.logger.debug(f"工具 '{tool_name}' 调用成功，返回结果: {result}")
             return result
         except Exception as e:
             self.logger.error(f"工具 '{tool_name}' 调用失败: {str(e)}")
             raise
-    
+
     def invoke_by_strategy(self, strategy, file_path):
         """根据策略配置调用工具
         
@@ -85,7 +85,7 @@ class ToolInvoker:
         """
         # 1. 调用策略的compress方法，策略内部会使用ToolInvoker调用具体工具
         return strategy.compress(file_path)
-    
+
     def get_tool_parameter_set(self, tool_name, params_dict=None):
         """获取指定工具的参数集合
         
@@ -102,7 +102,7 @@ class ToolInvoker:
             param_dict=params_dict or {},
             param_definitions=param_definitions
         )
-    
+
     def validate_tool_parameters(self, tool_name, params_dict):
         """验证指定工具的参数
         
@@ -115,7 +115,7 @@ class ToolInvoker:
         """
         param_set = self.get_tool_parameter_set(tool_name, params_dict)
         param_set.validate()
-    
+
     def get_tool_parameter_definitions(self, tool_name):
         """获取指定工具的参数定义
         
