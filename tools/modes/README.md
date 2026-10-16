@@ -1,6 +1,6 @@
 # Windows 压缩工具准备
 
-这些文件只用于本机运行和打包，不提交到 Git。请从本项目相同版本 [Release](https://github.com/luokai-demo/lk-compressor/releases) 下载 `Windows构建依赖.zip`，核对 SHA256 后解压到项目根目录。
+这些文件只用于本机运行和打包，不提交到 Git。请从本项目相同版本 [Release](https://github.com/luokai-demo/lk-compressor/releases) 下载 `windows-build-tools.zip`，核对 SHA256 后解压到项目根目录。
 
 ```text
 tools/modes/

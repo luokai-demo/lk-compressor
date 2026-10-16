@@ -4,7 +4,7 @@
 
 ## 下载与运行
 
-前往 [Release 下载页面](https://github.com/luokai-demo/lk-compressor/releases/latest)，下载 `LK压缩-v2.1.0-Windows-x64.exe`，双击运行；使用打包版本无需安装 Python，也无需另外配置压缩工具。当前发行版未进行代码签名。
+前往 [Release 下载页面](https://github.com/luokai-demo/lk-compressor/releases/latest)，下载 `LK-Compressor-v2.1.0-Windows-x64.exe`，双击运行；使用打包版本无需安装 Python，也无需另外配置压缩工具。当前发行版未进行代码签名。
 
 **压缩会在原位置覆盖变小的文件。请先备份或复制资源，再在副本上测试。** 常规压缩和极致压缩都可能产生有损结果；音频使用低码率编码，不适合对音质要求高的原始素材。
 
@@ -27,7 +27,7 @@ py -3.13 -m venv .venv
 python -m pip install -r requirements-dev.txt
 ```
 
-从同一版本 Release 下载 `Windows构建依赖.zip`，核对 `SHA256SUMS.txt` 后解压到项目根目录。解压后应出现 `tools/modes/pngquant.exe` 等文件，详见 [压缩工具准备](tools/modes/README.md)。工具包含 Windows 原生扩展，不能用 macOS/Linux 环境替代。
+从同一版本 Release 下载 `windows-build-tools.zip`，核对 `SHA256SUMS.txt` 后解压到项目根目录。解压后应出现 `tools/modes/pngquant.exe` 等文件，详见 [压缩工具准备](tools/modes/README.md)。工具包含 Windows 原生扩展，不能用 macOS/Linux 环境替代。
 
 ```powershell
 .

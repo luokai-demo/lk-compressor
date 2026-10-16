@@ -12,7 +12,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw '构建依赖检查失败' }
     python -m PyInstaller --noconfirm --clean src/compress_gui.spec
     if ($LASTEXITCODE -ne 0) { throw 'PyInstaller 打包失败' }
-    python -m pip freeze | Set-Content (Join-Path $distDir '构建依赖版本.txt') -Encoding utf8
+    python -m pip freeze | Set-Content (Join-Path $distDir 'build-dependencies.txt') -Encoding utf8
     if ($LASTEXITCODE -ne 0) { throw '依赖版本记录失败' }
     Write-Host "构建完成：$distDir\图片压缩工具.exe"
 } finally {

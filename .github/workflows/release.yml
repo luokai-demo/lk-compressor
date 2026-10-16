@@ -36,13 +36,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw '无法读取版本 Tag' }
           $tagCommit = git rev-list -n 1 $env:RELEASE_TAG
           if ($tagCommit -ne (git rev-parse HEAD)) { throw '版本 Tag 与当前工作流提交不一致' }
-          gh release download $env:RELEASE_TAG --pattern 'Windows构建依赖.zip' --pattern 'SHA256SUMS.txt' --dir .build-input
+          gh release download $env:RELEASE_TAG --pattern 'windows-build-tools.zip' --pattern 'SHA256SUMS.txt' --dir .build-input
           if ($LASTEXITCODE -ne 0) { throw '构建依赖下载失败' }
-          $expected = (Get-Content .build-input/SHA256SUMS.txt | Where-Object { $_ -match '  Windows构建依赖\.zip$' })
+          $expected = (Get-Content .build-input/SHA256SUMS.txt | Where-Object { $_ -match '  windows-build-tools\.zip$' })
           if (@($expected).Count -ne 1) { throw '构建依赖校验记录缺失或重复' }
-          $actual = (Get-FileHash .build-input/Windows构建依赖.zip -Algorithm SHA256).Hash.ToLower()
+          $actual = (Get-FileHash .build-input/windows-build-tools.zip -Algorithm SHA256).Hash.ToLower()
           if ($actual -ne $expected.Split(' ')[0]) { throw '构建依赖 SHA256 不匹配' }
-          Expand-Archive .build-input/Windows构建依赖.zip -DestinationPath . -Force
+          Expand-Archive .build-input/windows-build-tools.zip -DestinationPath . -Force
       - name: 安装 Python 依赖
         run: python -m pip install -r requirements-dev.txt
       - name: 核心检查
@@ -56,15 +56,15 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $name = "LK压缩-$env:RELEASE_TAG-Windows-x64.exe"
+          $name = "LK-Compressor-$env:RELEASE_TAG-Windows-x64.exe"
           Copy-Item dist/图片压缩工具.exe "dist/$name"
-          Compress-Archive -Path tools/modes/licenses/* -DestinationPath dist/第三方许可.zip
-          $files = @("dist/$name", 'dist/第三方许可.zip', 'dist/构建依赖版本.txt')
-          $checksums = @((Get-Content .build-input/SHA256SUMS.txt | Where-Object { $_ -match '  Windows构建依赖\.zip$' }))
+          Compress-Archive -Path tools/modes/licenses/* -DestinationPath dist/THIRD-PARTY-LICENSES.zip
+          $files = @("dist/$name", 'dist/THIRD-PARTY-LICENSES.zip', 'dist/build-dependencies.txt')
+          $checksums = @((Get-Content .build-input/SHA256SUMS.txt | Where-Object { $_ -match '  windows-build-tools\.zip$' }))
           foreach ($file in $files) {
             $hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower()
             $checksums += "$hash  $(Split-Path $file -Leaf)"
           }
           $checksums | Set-Content dist/SHA256SUMS.txt -Encoding utf8NoBOM
-          gh release upload $env:RELEASE_TAG @files dist/SHA256SUMS.txt --clobber
+          gh release upload $env:RELEASE_TAG "dist/$name#Windows 图片音频压缩软件" "dist/THIRD-PARTY-LICENSES.zip#第三方组件许可" "dist/build-dependencies.txt#构建依赖版本" "dist/SHA256SUMS.txt#SHA256 校验值" --clobber
           if ($LASTEXITCODE -ne 0) { throw 'Release 附件上传失败' }
