@@ -256,9 +256,6 @@ class MozjpegTool(CompressionTool):
                 "3",  # 更激进的量化表
                 "-dct",
                 "float",  # 更高质量的DCT算法
-                "-outfile",
-                tmp_file,
-                file_path
             ]
 
             # 确保临时文件目录存在
@@ -266,8 +263,12 @@ class MozjpegTool(CompressionTool):
             if not os.path.exists(tmp_dir):
                 os.makedirs(tmp_dir, exist_ok=True)
 
-            # 直接执行参数列表，避免资源路径中的特殊字符被命令解释器执行。
-            result = subprocess.run(cmd, capture_output=True, text=True, shell=False, encoding='utf-8', errors='ignore')
+            # 由 Python 打开 Unicode 路径，通过标准流传递内容，避免原生工具的窄字符文件名限制。
+            with open(file_path, 'rb') as source_file, open(tmp_file, 'wb') as output_file:
+                result = subprocess.run(
+                    cmd, stdin=source_file, stdout=output_file, stderr=subprocess.PIPE,
+                    text=True, shell=False, encoding='utf-8', errors='replace', timeout=60,
+                )
 
             if result.returncode == 0 and os.path.exists(tmp_file):
                 new_size = self.get_file_size(tmp_file)
