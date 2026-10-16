@@ -1,0 +1,20 @@
+name: 代码检查
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    name: 核心检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+      - name: 检查 Python 语法
+        run: python -m compileall -q src test scripts
+      - name: 验证核心参数和配置
+        run: python -m unittest discover -s test -v

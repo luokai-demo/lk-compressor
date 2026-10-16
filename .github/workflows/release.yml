@@ -1,0 +1,70 @@
+name: Windows 打包发布
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '草稿 Release 版本，例如 v2.1.0'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: windows-release
+  cancel-in-progress: false
+jobs:
+  build:
+    name: Windows 构建与验证
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+          architecture: x64
+      - name: 校验发布目标并下载工具
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:RELEASE_TAG -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+$') { throw '版本格式不正确' }
+          git fetch origin tag $env:RELEASE_TAG
+          if ($LASTEXITCODE -ne 0) { throw '无法读取版本 Tag' }
+          $tagCommit = git rev-list -n 1 $env:RELEASE_TAG
+          if ($tagCommit -ne (git rev-parse HEAD)) { throw '版本 Tag 与当前工作流提交不一致' }
+          gh release download $env:RELEASE_TAG --pattern 'Windows构建依赖.zip' --pattern 'SHA256SUMS.txt' --dir .build-input
+          if ($LASTEXITCODE -ne 0) { throw '构建依赖下载失败' }
+          $expected = (Get-Content .build-input/SHA256SUMS.txt | Where-Object { $_ -match '  Windows构建依赖\.zip$' })
+          if (@($expected).Count -ne 1) { throw '构建依赖校验记录缺失或重复' }
+          $actual = (Get-FileHash .build-input/Windows构建依赖.zip -Algorithm SHA256).Hash.ToLower()
+          if ($actual -ne $expected.Split(' ')[0]) { throw '构建依赖 SHA256 不匹配' }
+          Expand-Archive .build-input/Windows构建依赖.zip -DestinationPath . -Force
+      - name: 安装 Python 依赖
+        run: python -m pip install -r requirements-dev.txt
+      - name: 核心检查
+        run: python -m unittest discover -s test -v
+      - name: 构建 Windows EXE
+        shell: pwsh
+        run: ./build.ps1
+      - name: 验证 EXE 启动和资源压缩
+        run: python scripts/verify_windows_release.py dist/图片压缩工具.exe
+      - name: 上传草稿 Release 附件
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $name = "LK压缩-$env:RELEASE_TAG-Windows-x64.exe"
+          Copy-Item dist/图片压缩工具.exe "dist/$name"
+          Compress-Archive -Path tools/modes/licenses/* -DestinationPath dist/第三方许可.zip
+          $files = @("dist/$name", 'dist/第三方许可.zip', 'dist/构建依赖版本.txt')
+          $checksums = @((Get-Content .build-input/SHA256SUMS.txt | Where-Object { $_ -match '  Windows构建依赖\.zip$' }))
+          foreach ($file in $files) {
+            $hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLower()
+            $checksums += "$hash  $(Split-Path $file -Leaf)"
+          }
+          $checksums | Set-Content dist/SHA256SUMS.txt -Encoding utf8NoBOM
+          gh release upload $env:RELEASE_TAG @files dist/SHA256SUMS.txt --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Release 附件上传失败' }

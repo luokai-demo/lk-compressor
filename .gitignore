@@ -1,0 +1,43 @@
+# Python 环境与缓存
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# 构建输出与本机工具；EXE 和依赖包通过 Release 分发
+build/
+dist/
+.build-input/
+*.egg-info/
+/tools/modes/*
+!/tools/modes/README.md
+
+# 操作日志、用户设置与测试生成数据
+logs/
+*.log
+*.log.*
+startup_warning_config.json
+/test-img/
+/test_images/
+/test-audio/
+/test_strategy_output/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 编辑器、系统文件与本机凭证
+.trae/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.pem
+*.key
+*.p12
+*.pfx
+*.patch
+*.bak
